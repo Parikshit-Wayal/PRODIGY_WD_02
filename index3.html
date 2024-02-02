@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: rgba(0, 0, 0, 0.919);
+        }
+    #s{
+        color: rgb(76, 255, 103);
+        align-items:start;
+    }
+
+        #stopwatch {
+            text-align: center;
+        }
+        #stopwatch:hover{
+            box-shadow: 0 0 50px rgb(163, 44, 193);
+        }
+
+        #controls {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            margin: 0 10px;
+            cursor: pointer;
+            transition: box-shadow 0.3s ease-in-out;
+            background-color: white;
+            color: red;
+            border-radius: 25px;
+            
+        }
+
+        button:hover {
+            box-shadow: 0 0 40px rgba(95, 160, 48, 0.962);
+        }
+        h1{
+            color: rgb(181, 29, 29);
+        }
+    </style>
+</head>
+<body>
+    <div>
+        <div id="stopwatch">
+            <h1 id="s">Stopwatch</h1>
+            <h1 id="display">00:00:00</h1>
+            <div id="lapTimes"></div>
+        </div>
+
+        <div id="controls">
+            <button onclick="startStopwatch()">Start</button>
+            <button onclick="pauseStopwatch()">Pause</button>
+            <button onclick="resetStopwatch()">Reset</button>
+            <button onclick="recordLap()">Lap</button>
+        </div>
+    </div>
+
+    <script>
+        // Your JavaScript code remains unchanged
+        let isRunning = false;
+        let startTime;
+        let lapTimes = [];
+        let lapId = 1;
+
+        function startStopwatch() {
+            if (!isRunning) {
+                isRunning = true;
+                startTime = new Date().getTime() - getTotalPausedTime();
+                updateStopwatch();
+            }
+        }
+
+        function pauseStopwatch() {
+            isRunning = false;
+            updateStopwatch();
+        }
+
+        function resetStopwatch() {
+            isRunning = false;
+            startTime = 0;
+            lapTimes = [];
+            lapId = 1;
+            updateStopwatch();
+        }
+
+        function recordLap() {
+            if (isRunning) {
+                const lapTime = new Date().getTime() - startTime;
+                lapTimes.push({ id: lapId++, time: formatTime(lapTime) });
+                updateLapTimes();
+            }
+        }
+
+        function updateStopwatch() {
+            const currentTime = isRunning ? new Date().getTime() - startTime : 0;
+            document.getElementById('display').innerText = formatTime(currentTime);
+        }
+
+        function updateLapTimes() {
+            const lapTimesElement = document.getElementById('lapTimes');
+            lapTimesElement.innerHTML = '';
+
+            lapTimes.forEach(lap => {
+                const lapItem = document.createElement('div');
+                lapItem.innerText = `Lap ${lap.id}: ${lap.time}`;
+                lapTimesElement.appendChild(lapItem);
+                lapItem.style="color:white";
+            });
+        }
+
+        function getTotalPausedTime() {
+            if (lapTimes.length === 0) {
+                return 0;
+            }
+
+            return lapTimes.reduce((total, lap) => {
+                const lapTimeInSeconds = lap.time.split(':').reduce((acc, val, index) => {
+                    return acc + parseInt(val) * Math.pow(60, 2 - index);
+                }, 0);
+                return total + lapTimeInSeconds * 1000;
+            }, 0);
+        }
+
+        function formatTime(milliseconds) {
+            const totalSeconds = Math.floor(milliseconds / 1000);
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            const millis = Math.floor((milliseconds % 1000) / 10);
+
+            return `${padTime(minutes)}:${padTime(seconds)}:${padTime(millis)}`;
+        }
+
+        function padTime(value) {
+            return value < 10 ? `0${value}` : value;
+        }
+
+        setInterval(updateStopwatch, 10);
+    </script>
+</body>
+</html>
